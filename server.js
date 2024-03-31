@@ -54,18 +54,25 @@ app.get('/book_dtls', (req, res) => {
   BookDetails.show_book_dtls(res, req.query.id);
 })
 
-app.post('/newbook', (req, res) => {
-    const familyName = req.body.familyName;
-    const firstName = req.body.firstName;
-    const genreName = req.body.genreName;
-    const bookTitle = req.body.bookTitle;
-    if(familyName && firstName && genreName && bookTitle) {
-        CreateBook.new_book(res, familyName, firstName, genreName, bookTitle).catch(err => {
-                res.send('Failed to create new book ' + err);
-              });
-    }
-    else {
-        res.send('Invalid Inputs');
-    }
 
-})
+//fix sending the error message to the client with sanitization
+app.post('/newbook', (req, res) => {
+  const familyName = req.body.familyName;
+  const firstName = req.body.firstName;
+  const genreName = req.body.genreName;
+  const bookTitle = req.body.bookTitle;
+  if (familyName && firstName && genreName && bookTitle) {
+      CreateBook.new_book(res, familyName, firstName, genreName, bookTitle)
+          .then(() => {
+              return res.send('New book created successfully');
+          })
+          .catch(err => {
+              console.error('Error creating new book:', err);
+              return res.status(500).send('Failed to create new book. Please try again later.');
+          });
+  } else {
+      return res.status(400).send('Invalid Inputs');
+  }
+});
+
+
